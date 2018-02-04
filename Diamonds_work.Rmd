@@ -1,0 +1,202 @@
+---
+title: "Diamonds Price Estimation"
+author: "Meryem Kemerci"
+date: "3 Aralýk 2017"
+output: html_document
+---
+
+```{r, echo=FALSE}
+multiplot <- function(..., plotlist = NULL, file, cols = 1, layout = NULL) {
+  require(grid)
+
+  plots <- c(list(...), plotlist)
+
+  numPlots = length(plots)
+
+  if (is.null(layout)) {
+    layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
+                 ncol = cols, nrow = ceiling(numPlots/cols))
+}
+
+if (numPlots == 1) {
+print(plots[[1]])
+
+} else {
+grid.newpage()
+pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
+
+for (i in 1:numPlots) {
+  matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
+
+  print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
+                                  layout.pos.col = matchidx$col))
+ }
+}
+ }
+```
+
+##DIAMONDS
+ ![](C:\Users\merye\Desktop\GIA-UpdatedSpokes_700x394-3.jpg) 
+
+
+
+#First we load necessary libraries, 
+
+```{r, message=FALSE}
+set.seed(503)
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(psych)
+getwd()
+
+data<-read.csv("C:\\Users\\merye\\Desktop\\diamonds.csv")
+
+
+```
+
+```{r}
+data %>%
+  tbl_df() 
+```
+
+
+#Content
+
+> 1.Price in US dollars (\$326--\$18,823)
+
+> 2.Carat weight of the diamond (0.2--5.01)
+
+> 3.Cut quality of the cut (Fair, Good, Very Good, Premium, Ideal)
+
+> 4.Color diamond from J (worst) to D (best)
+
+> 5.Clarity a measurement of how clear the diamond is (I1 (worst), SI2, SI1, VS2, VS1, VVS2, VVS1, IF (best))
+
+> 6.X length in mm (0--10.74)
+
+> 7.Y width in mm (0--58.9)
+
+> 8.Z depth in mm (0--31.8)
+
+> 9.Depth total depth percentage = z / mean(x, y) = 2 * z / (x + y) (43--79)
+
+> 10.Table width of top of diamond relative to widest point (43--95)
+
+**1.**We check data : 
+```{r}
+glimpse(data)
+
+```
+
+**2.**Checking Statistical values for each column : 
+```{r}
+summary(data)
+```
+
+
+```{r, echo=FALSE}
+# p1 <- ggplot(subset(data), aes(x=carat, colour=carat)) +
+#   theme(plot.title = element_text(size=12)) +
+#   geom_histogram(binwidth = 1,color = 'black', fill = '#999999') +
+#   ggtitle("Carat") +
+#   labs(x="Carat", y="Diamonds Count", size = 8)
+# 
+# p2 <- ggplot(subset(data ), aes(x=depth, colour=depth)) +
+#   theme(plot.title = element_text(size=12)) +
+#   geom_histogram(binwidth = 2,color = 'black', fill = '#009E73') +
+#   ggtitle("Depth Values") +
+#   labs(x="Depth", y="Diamonds Count", size = 8)
+# 
+# p3 <- ggplot(subset(data ), aes(x=price, colour=price)) +
+#    theme(plot.title = element_text(size=12)) +
+#   geom_histogram(binwidth = 0.5,color = 'black', fill = '#56B4E9') +
+#   ggtitle("Price") +
+#   labs(x="Price of Diamonds", y="Diamonds Count", size = 8)
+# 
+# p4 <- ggplot(subset(data), aes(x=x, colour=x)) +
+#   theme(plot.title = element_text(size=12)) +
+#   geom_histogram(binwidth = 1,color = 'black', fill = '#E69F00') +
+#   ggtitle("X")+
+#   labs(x="X", y="Diamonds Count", size = 8)
+#   
+# 
+# p5 <- ggplot(subset(data ), aes(x=y, colour=y)) +
+#   theme(plot.title = element_text(size=12)) +
+#   geom_histogram(binwidth = 3,color = 'black', fill = '#F0E442') +
+#   ggtitle("Y") +
+#   labs(x="Y", y="Diamonds Count", size = 8)
+# 
+# p6 <- ggplot(subset(data ), aes(x=z, colour=z)) +
+#   theme(plot.title = element_text(size=12)) +
+#   geom_histogram(binwidth=1, color = 'black', fill = '#0072B2') +
+#   ggtitle("Z") +
+#   labs(x="Z", y="Diamonds Count", size = 8)
+# 
+# p7 <- ggplot(subset(data ), aes(x=table, colour=table)) +
+#   theme(plot.title = element_text(size=12)) +
+#   geom_histogram(binwidth= 3, color = 'black', fill = '#0072B2') +
+#   ggtitle("Table") +
+#   labs(x="Table", y="Diamonds Count", size = 8)  
+# 
+# multiplot(p1,p2,p3,p4,p5,p6,p7,cols=3)
+```
+
+```{r}
+qplot(carat, price, data=data, color=color, shape=cut)
+ 
+```
+
+
+```{r}
+qplot(log(carat), log(price),
+data=data, color=clarity)
+
+```
+
+When we take log values of carat and price, we found "linear" plot. Price and carat variables are positively associated. 
+
+Facet function helps us to see numeric data together, 
+```{r}
+qplot(price, carat, data=data,
+facets = . ~ color)
+```
+
+We will see color and clarity 
+```{r}
+qplot(price, carat, data=data,
+facets = color ~ clarity)
+```
+
+```{r}
+qplot(cut, data=data, geom="bar")
+
+# p<-ggplot(data=data, aes(x=cut, y=price)) +
+#   geom_bar(stat="identity", fill="steelblue")
+# 
+# p
+```
+
+```{r}
+qplot(price, data=data, binwidth = 1000,
+geom="histogram")
+```
+
+
+```{r}
+b1 <- ggplot(data, aes(x=color,fill=as.character(data$cut) ))+
+  theme(axis.text.x = element_text(angle = 60, hjust=1))+
+  geom_bar() +
+  labs(x="Diamonds Colors", y="Diamonds Price", fill="Cut")
+b1
+```
+
+#Principal Component Analysis
+
+```{r}
+
+```
+
+References : 
+image ref : <https://www.google.com.tr/search?q=diamond&source=lnms&tbm=isch&sa=X&ved=0ahUKEwj98rTc9PDXAhWIJVAKHezbBXQQ_AUICigB&biw=1280&bih=590#imgrc=9a9zoVEXY8u10M:>
+<http://had.co.nz/stat480/lectures/07-r-intro.pdf>
